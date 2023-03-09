@@ -14,17 +14,9 @@ class LSUNBase(Dataset):
                  interpolation="bicubic",
                  flip_p=0.5
                  ):
-        self.data_paths = txt_file
-        self.data_root = data_root
-        with open(self.data_paths, "r") as f:
-            self.image_paths = f.read().splitlines()
-        self._length = len(self.image_paths)
-        self.labels = {
-            "relative_file_path_": [l for l in self.image_paths],
-            "file_path_": [os.path.join(self.data_root, l)
-                           for l in self.image_paths],
-        }
 
+        self.data_npz = np.load(data_root)  # 4D array (num, h, w, 3)
+        self._length = self.data_npz.shape[0]
         self.size = size
         self.interpolation = {"linear": PIL.Image.LINEAR,
                               "bilinear": PIL.Image.BILINEAR,
@@ -37,8 +29,8 @@ class LSUNBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        example = dict((k, self.labels[k][i]) for k in self.labels)
-        image = Image.open(example["file_path_"])
+        example = dict()
+        image = Image.fromarray(self.data_npz[i])
         if not image.mode == "RGB":
             image = image.convert("RGB")
 
@@ -61,12 +53,12 @@ class LSUNBase(Dataset):
 
 class LSUNChurchesTrain(LSUNBase):
     def __init__(self, **kwargs):
-        super().__init__(txt_file="data/lsun/church_outdoor_train.txt", data_root="data/lsun/churches", **kwargs)
+        super().__init__(txt_file=None, data_root="data/lsun/lsun_church_64x64_tra.npy", **kwargs)
 
 
 class LSUNChurchesValidation(LSUNBase):
     def __init__(self, flip_p=0., **kwargs):
-        super().__init__(txt_file="data/lsun/church_outdoor_val.txt", data_root="data/lsun/churches",
+        super().__init__(txt_file=None, data_root="data/lsun/lsun_church_64x64_val.npy",
                          flip_p=flip_p, **kwargs)
 
 
