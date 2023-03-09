@@ -29,7 +29,7 @@ class LSUNBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        example = dict()
+        example = {'label':'church'}
         image = Image.fromarray(self.data_npz[i])
         if not image.mode == "RGB":
             image = image.convert("RGB")
